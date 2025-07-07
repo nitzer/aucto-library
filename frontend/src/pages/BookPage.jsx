@@ -1,8 +1,8 @@
-import { useParams } from "react-router";
+import { Link, useParams } from "react-router";
 import MainTitle from "../components/UI/MainTitle";
 import { useQuery } from "@tanstack/react-query";
 import { getBook } from "../api/api";
-import { Alert, Col, Row, Spin } from "antd";
+import { Alert, Col, Divider, Row, Space, Spin } from "antd";
 import { useEffect } from "react";
 
 const BookPage = () => {
@@ -13,6 +13,7 @@ const BookPage = () => {
     queryFn: ({ signal }) => getBook({ signal, bookId: params.bookId }),
   });
 
+  // Book Title!
   useEffect(() => {
     document.title = data
       ? `Library - ${data.title} by ${data.author.firstName} ${data.author.lastName}`
@@ -38,19 +39,30 @@ const BookPage = () => {
 
   if (data) {
     content = (
-      <Row gutter={16}>
-        <Col span={4}>
-          <img
-            src={`https://picsum.photos/200/400?random?random=${data._id}`}
-            alt={data.title}
-            className="h-[320px] w-[200px] object-cover"
-          />
-        </Col>
-        <Col span={20}>
+      <div>
+        <Space>
           <MainTitle text={data.title} />
-          <p>{data.description}</p>
-        </Col>
-      </Row>
+          <p>
+            <Link to={`/authors/${data.author._id}`}>
+              By {data.author.firstName} {data.author.lastName}
+            </Link>
+          </p>
+        </Space>
+        <Divider />
+        <Row gutter={16}>
+          <Col span={4}>
+            <img
+              src={`https://picsum.photos/200/400?random?random=${data._id}`}
+              alt={data.title}
+              className="h-[320px] w-[200px] object-cover"
+            />
+          </Col>
+          <Col span={20}>
+            <MainTitle text={data.title} />
+            <p>{data.description}</p>
+          </Col>
+        </Row>
+      </div>
     );
   }
 

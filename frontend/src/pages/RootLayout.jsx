@@ -8,6 +8,7 @@ import { socket } from "./../socket";
 
 const contentStyle = {
   padding: "0 48px",
+  marginTop: '48px',
 };
 
 const RootLayout = () => {
@@ -34,8 +35,7 @@ const RootLayout = () => {
     <App notification={{ placement: "bottomRight" }}>
       <Layout>
         <MainHeader />
-        <Content style={contentStyle}>
-          <div> &nbsp; </div>
+        <Content style={contentStyle} className="w-xxl">
           <div
             style={{
               background: colorBgContainer,

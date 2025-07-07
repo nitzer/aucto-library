@@ -21,28 +21,51 @@ export class BooksService {
 
   async findAll(page: number = 1) {
     const amountPerPage = 10;
-    return await this.bookModel
+    // Not ideal, but I'm not that good with aggregates (Yet!)
+    const totalBooks = await this.bookModel.countDocuments();
+    const totalPages = Math.ceil(totalBooks / amountPerPage);
+
+    const books = await this.bookModel
       .find()
       .populate('author')
       .sort({ createdAt: -1 })
       .limit(amountPerPage)
       .skip((page - 1) * amountPerPage)
       .exec();
+
+    return {
+      books: books,
+      total: totalBooks,
+      page: page,
+      lastPage: totalPages,
+    };
   }
 
-  async findByAuthorId(author: string) {
-    return await this.bookModel
+  async findByAuthorId(author: string, page: number = 1) {
+    const amountPerPage = 10;
+
+    // Not ideal, but I'm not that good with aggregates (Yet!)
+    const totalBooks = await this.bookModel.find({ author }).countDocuments();
+    const totalPages = Math.ceil(totalBooks / amountPerPage);
+
+    const books = await this.bookModel
       .find({ author })
       .populate('author')
       .sort({ createdAt: -1 })
+      .limit(amountPerPage)
+      .skip((page - 1) * amountPerPage)
       .exec();
+
+    return {
+      books: books,
+      total: totalBooks,
+      page: page,
+      lastPage: totalPages,
+    };
   }
 
   async findOne(id: string) {
-    return await this.bookModel
-      .findById(id)
-      .populate('author')
-      .exec();
+    return await this.bookModel.findById(id).populate('author').exec();
   }
 
   async update(id: string, updateBookDto: UpdateBookDto) {

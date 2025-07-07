@@ -1,15 +1,22 @@
-import { useQuery } from "@tanstack/react-query";
-import { useParams } from "react-router";
-import { getLatestBooks } from "../../api/api";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { getLatestBooks, queryClient } from "../../api/api";
 import BookCard from "./BookCard";
-import { Flex, Divider } from "antd";
+import { Flex, Divider, Pagination } from "antd";
 import MainTitle from "../UI/MainTitle";
+import { useState } from "react";
 
 const LatestBooks = () => {
+  const [page, setPage] = useState(1);
+
   const { isLoading, isError, error, data } = useQuery({
-    queryKey: ["books"],
-    queryFn: ({ signal }) => getLatestBooks({ signal }),
+    queryKey: ["books", page],
+    queryFn: ({ signal }) => getLatestBooks({ signal, page }),
+    placeholderData: keepPreviousData,
   });
+
+  const handlePagination = (page) => {
+    setPage(page);
+  };
 
   let content;
 
@@ -24,12 +31,23 @@ const LatestBooks = () => {
   if (!data) {
     content = <p>No books, please add one.</p>;
   } else if (data) {
+    console.log(data);
     content = (
-      <Flex wrap gap="small">
-        {data.map((book) => (
+      <>
+        <Flex wrap gap="small">
+          {data.books.map((book) => (
             <BookCard key={book._id} book={book} />
-        ))}
-      </Flex>
+          ))}
+        </Flex>
+        <Divider />
+        <div className="flex justify-center">
+          <Pagination
+            defaultCurrent={data.page}
+            total={data.total}
+            onChange={handlePagination}
+          />
+        </div>
+      </>
     );
   }
 
