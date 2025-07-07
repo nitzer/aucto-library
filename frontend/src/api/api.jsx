@@ -79,7 +79,8 @@ export async function getBook({ signal, bookId }) {
 export async function getLatestBooks({ signal, page }) {
   const url = new URL(`${baseUrl}/books`);
 
-  const currentPage = page ? page : 0;
+  const currentPage = page ? page : 1;
+
   url.searchParams.append("page", currentPage);
 
   const response = await fetch(url.toString(), { signal });
@@ -95,11 +96,11 @@ export async function getLatestBooks({ signal, page }) {
   return await response.json();
 }
 
-export async function getBooksByAuthor({ signal, authorId }) {
-  console.log(`fetching books from ${authorId}`);
-  const response = await fetch(`${baseUrl}/books/author/${authorId}`, {
-    signal,
-  });
+export async function getBooksByAuthor({ signal, authorId, page = 1 }) {
+  console.log(page);
+  const url = new URL(`${baseUrl}/books/author/${authorId}`);
+  url.searchParams.append("page", page);
+  const response = await fetch(url.toString(), { signal });
 
   if (!response.ok) {
     const error = new Error("An error occurred, please try again later");

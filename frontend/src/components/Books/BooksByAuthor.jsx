@@ -2,15 +2,20 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router";
 import { getBooksByAuthor } from "../../api/api";
 import BookCard from "./BookCard";
-import { Flex } from "antd";
+import { Divider, Flex, Pagination } from "antd";
+import { useState } from "react";
 
 const BooksByAuthor = ({ authorId }) => {
-  const params = useParams();
+  const [page, setPage] = useState(1);
 
   const { isLoading, isError, error, data } = useQuery({
-    queryKey: ["books", { authorId }],
-    queryFn: ({ signal }) => getBooksByAuthor({ signal, authorId }),
+    queryKey: ["books", authorId, page],
+    queryFn: ({ signal }) => getBooksByAuthor({ signal, authorId, page }),
   });
+
+  const handlePagination = (page) => {
+    setPage(page);
+  };
 
   let content;
 
@@ -25,12 +30,23 @@ const BooksByAuthor = ({ authorId }) => {
   if (!data) {
     content = <p>No books, please add one.</p>;
   } else if (data) {
+    console.log(data);
     content = (
-      <Flex wrap gap="large">
-        {data.map((book) => (
-          <BookCard key={book._id} book={book} />
-        ))}
-      </Flex>
+      <>
+        <Flex wrap gap="large">
+          {data.books.map((book) => (
+            <BookCard key={book._id} book={book} />
+          ))}
+        </Flex>
+        <Divider />
+        <div className="flex justify-center">
+          <Pagination
+            current={page}
+            total={data.total}
+            onChange={handlePagination}
+          />
+        </div>
+      </>
     );
   }
 
