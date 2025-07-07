@@ -9,6 +9,8 @@ export default defineConfig({
     strictPort: true,
   },
   server: {
+    //Added for the sake of testing, not a good practice :)
+    allowedHosts: true,
     port: 3001,
     strictPort: true,
     host: true,

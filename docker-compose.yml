@@ -1,73 +1,61 @@
-version: '3.8'
-
 services:
   # MongoDB Database Service
   mongo:
-    image: mongo:latest # Use the official MongoDB image
+    image: mongo:latest
     container_name: mongodb_container
     ports:
-      - "27017:27017" # Map host port 27017 to container port 27017
+      - "27017:27017"
     volumes:
-      - mongodb_data:/data/db # Persist MongoDB data to a named volume
+      - mongodb_data:/data/db
     environment:
-      - MONGO_PORT=27017 # Explicitly define the MongoDB port for clarity
+      - MONGO_PORT=27017
     networks:
-      - app_network # Connect to the custom network
+      - app_network
 
   # NestJS Backend Service (Development)
   backend:
     build:
-      context: ./backend # Specify the build context
-      dockerfile: Dockerfile # Use the development Dockerfile
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: nestjs_backend
     ports:
-      - "3000:3000" # Map host port 3000 to container port 3000 (NestJS default)
+      - "3000:3000"
     environment:
-      # Environment variables for the backend to connect to MongoDB
       - DATABASE_URL=mongodb://mongo:27017/library
-      - PORT=3000 # Ensure NestJS listens on this port
-      - CORS_ORIGIN=http://localhost:3001 # For local development
+      - PORT=3000
+      - CORS_ORIGIN=http://localhost:3001
     depends_on:
-      - mongo # Ensure MongoDB starts before the backend
+      - mongo
     networks:
-      - app_network # Connect to the custom network
+      - app_network
     volumes:
-      # Bind mount the backend code for live reloading during development
       - ./backend:/app
-      # Exclude node_modules from the bind mount to avoid issues with host/container differences
       - /app/node_modules
-    # Override the CMD in the Dockerfile to run in watch mode
     command: npm run start:dev
 
   # React Frontend Service (Development)
   frontend:
     build:
-      context: ./frontend # Specify the build context
-      dockerfile: Dockerfile # Use the development Dockerfile
+      context: ./frontend
+      dockerfile: Dockerfile
     container_name: react_frontend
     environment:
       - API_URL=http://backend:3000
-    # React's development server typically runs on port 5713.
-    # We'll map host port 3001 to container port 5713 (React's default).
     ports:
-      - "3001:3001" # Map host port 3001 to container port 5713
+      - "3001:3001"
     depends_on:
-      - backend # Ensure backend is running (optional, but good practice)
+      - backend
     networks:
-      - app_network # Connect to the custom network
+      - app_network
     volumes:
-      # Bind mount the frontend code for live reloading during development
       - ./frontend:/app
-      # Exclude node_modules from the bind mount
       - /app/node_modules
-    # Override the CMD in the Dockerfile to run the development server
     command: npm run dev
 
 # Define named volumes for data persistence
 volumes:
-  mongodb_data: # This volume will store your MongoDB data
+  mongodb_data: 
 
-# Define a custom network for inter-service communication
 networks:
   app_network:
     driver: bridge # Use the default bridge driver
